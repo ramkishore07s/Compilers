@@ -1,0 +1,8 @@
+int a(bool a, int b) {
+# Testing for loop:
+for (i[b[0]][3][5] = 0; -+-+i[1]<5; i = i[4] + 1*5) { a = a + 2; }
+# Testing while loop:
+while (a == b) { a = 1; b = b + b[4]; }
+# Testing conditional expr:
+a = a == 2? b + 2 : c;
+}

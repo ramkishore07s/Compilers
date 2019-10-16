@@ -1,0 +1,16 @@
+uint pow(int n, int k) {
+    uint val; val = 1;
+    for(i=1; i<=k; i=i+1) {
+        val = val * n; }
+    return val; }
+int main() {
+        uint n, k;
+        n = input("%u");
+        k = input("%u");val = 0;
+        for(i=-1; i<=n; i=i+1) {
+           val = val + pow(i, k);
+           ;
+            }
+        output(val);
+  }
+
