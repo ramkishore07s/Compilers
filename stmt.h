@@ -63,3 +63,13 @@ public:
 
     virtual void debug();
 };
+
+class Nbreak : public NStatement {
+public:
+    virtual void debug();
+};
+
+class Ncontinue : public NStatement {
+public:
+    virtual void debug();
+};

@@ -123,6 +123,14 @@ void NforBlock::debug() {
     statementBlock.debug();
 }
 
+void Nbreak::debug() {
+    cout << "break; ";
+}
+
+void Ncontinue::debug() {
+    cout << "continue; ";
+}
+
 void Nreturn::debug() {
     cout <<"Return ";
     expr.debug();
