@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
+#include "node.h"
 #include "parser.hpp"
+
 #define SAVE_TOKEN  yylval.str = new std::string(yytext, yyleng)
 #define TOKEN(t)    (yylval.token = t)
 
@@ -25,6 +27,9 @@ using namespace std;
 "while"     return TOKEN(WHILE);
 "if"        return TOKEN(IF);
 "else"      return TOKEN(ELSE);
+
+"break"     return TOKEN(BREAK);
+"continue"  return TOKEN(CONTINUE);
 
 "return"    return TOKEN(RETURN);
 
