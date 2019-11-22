@@ -60,7 +60,7 @@ using namespace std;
 
 \"[^\"]*\"     SAVE_TOKEN; return STR;
 [0-9][0-9]*   SAVE_TOKEN; return NUM;
-'.'         SAVE_TOKEN; return CHAR;
+\'.\'         SAVE_TOKEN; return CHAR;
 
 #.*        ;
 [a-zA-Z][a-zA-Z0-9]*	SAVE_TOKEN; return ID;

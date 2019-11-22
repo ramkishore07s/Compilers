@@ -19,6 +19,7 @@
     NStatementBlock *statementBlock;
 
     NVariableName *varName;
+    NVariableAccess *varAccess;
     VarNames *varNames;
     Nconstant *constant;
     Nnum *n;
@@ -108,7 +109,7 @@ stmts : stmts stmt { $1->statements.push_back($2); }
 | stmt { $$ = new NStatementBlock(); $$->statements.push_back($1); }
 ;
 
-constant : varName { $$ = $1; }
+constant : varName { $$ = new NVariableAccess($1->name, $1->sizes); }
 | NUM { $$ = new Nnum(stoi(*$1)); }
 | CHAR { $$ = new NChar(*$1); }
 ;
@@ -161,7 +162,7 @@ ifBlock : IF LPAREN expr RPAREN stmtBlock { $$ = new NifBlock(*$3, *$5); }
 whileBlock : WHILE LPAREN expr RPAREN stmtBlock { $$ = new NwhileBlock(*$3, *$5); }
 ;
 
-forBlock : FOR LPAREN assignExpr SCOLON expr SCOLON assignExpr RPAREN stmtBlock { $$ = new NforBlock(*$3, *$5, *$7, *$9); }
+forBlock : FOR LPAREN stmt stmt stmt RPAREN stmtBlock { $$ = new NforBlock(*$3, *$4, *$5, *$7); }
 ;
 
 variableDecls : TYPE ids SCOLON { $$ = new NVariableDecls(*$1, *$2); }
@@ -177,15 +178,6 @@ varName : ID { $$ = new NVariableName(*$1); }
 
 %%
 
-int main(int argc, char **argv)
-{
-    yyparse();
-    printf("Parsing Over\n");
-    programNode->debug();
-
-    ModuleOb->print(llvm::errs(), nullptr);
-    return 0;
-}
 
 
 

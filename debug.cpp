@@ -3,136 +3,149 @@
 
 using namespace std;
 
-void NProgram::debug() {
+void NProgram::debug(Context &localContext, Context &globalContext) {
     cout << "\n";
     cout<< "Total top level nodes: " << functions.size() << "\n";
     for (size_t t=0; t < functions.size(); t++) {
         cout << "node: " << t << " :: ";
-        functions[t]->debug();
+        functions[t]->debug(localContext, globalContext);
         cout << "\n";
     }
 }
 
-void NStatementBlock::debug() {
+void NStatementBlock::debug(Context &localContext, Context &globalContext) {
     for (size_t t=0; t<statements.size(); t++) {
-        statements[t]->debug();
+        statements[t]->debug(localContext, globalContext);
         cout << "\n";
     }
 }
-void Nnum::debug() {
+void Nnum::debug(Context &localContext, Context &globalContext) {
     cout << "Number: " << num;
 }
 
-void Narg::debug() {
+void NChar::debug(Context &localContext, Context &globalContext) {
+    cout << "Char: " << int(c);
+}
+
+void Narg::debug(Context &localContext, Context &globalContext) {
     cout << "Arg: "<< type << " " << varName.name << " " << varName.type;
 }
 
-void Nargs::debug() {
+void Nargs::debug(Context &localContext, Context &globalContext) {
     cout<<"Func Args: " <<this->arguments.size() << " ";
     for (size_t t=0; t<this->arguments.size(); t++)
-        this->arguments[t]->debug();
+        this->arguments[t]->debug(localContext, globalContext);
     cout<<"\n";
 }
 
-void Nparam::debug() {
+void Nparam::debug(Context &localContext, Context &globalContext) {
     cout <<"Func params: ";
-    expr.debug();
+    expr.debug(localContext, globalContext);
     cout <<" ";
 }
 
-void Nparams::debug() {
+void Nparams::debug(Context &localContext, Context &globalContext) {
     for (size_t t=0; t<params.size(); t++)
-        params[t]->debug();
+        params[t]->debug(localContext, globalContext);
 }
 
-void NFunctionDef::debug() {
+void NFunctionDef::debug(Context &localContext_, Context &globalContext) {
     cout<< "Function Decl: " << "Type: " << this->type << " Name: " << this->id << "\n";
-    args.debug();
+    args.debug(localContext, globalContext);
     cout << "\n";
-    statementBlock.debug();
+    statementBlock.debug(localContext, globalContext);
     cout<<" ";
+
+    cout<<"\n";
+    cout<<"Local vars";
+    for(std::map<string,Value*>::iterator iter = localContext.locals.begin(); iter != localContext.locals.end(); ++iter) {
+        string k =  iter->first;
+        cout << k;
+    }
+    cout <<"\n";
 }
 
-void NfunctionCall::debug() {
+void NfunctionCall::debug(Context &localContext, Context &globalContext) {
     cout <<"Function call: " << id << " ";
-    params.debug();
+    params.debug(localContext, globalContext);
     cout << " ";
 }
 
-void NVariableName::debug() {
+void NVariableName::debug(Context &localContext, Context &globalContext) {
     cout<< "VarName :: " << this->type << " : " << this->name << " ";
     for (size_t t=0; t<sizes.size(); t++)
         cout << sizes[t] << " ";
 }
 
-void NVariableDecls::debug() {
+void NVariableDecls::debug(Context &localContext, Context &globalContext) {
     cout << "VarDecl :: ";
-    for (size_t t=0; t < varNames.size(); t++)
-        varNames[t]->debug();
+    for (size_t t=0; t < varNames.size(); t++) {
+        varNames[t]->debug(localContext, globalContext);
+    }
     cout << " ";
 }
 
-void NbinOp::debug() {
-    lhs.debug();
+void NbinOp::debug(Context &localContext, Context &globalContext) {
+    lhs.debug(localContext, globalContext);
     cout <<" Op: " << op << " ";
-    rhs.debug();
+    rhs.debug(localContext, globalContext);
     cout << " ";
 }
 
-void NassignOp::debug() {
+void NassignOp::debug(Context &localContext, Context &globalContext) {
     cout << "AssignOp: " << lhs.name << " ";
-    lhs.debug();
-    rhs.debug();
+    lhs.debug(localContext, globalContext);
+    rhs.debug(localContext, globalContext);
     cout <<" ";
 }
 
-void NconditionalOp::debug() {
+void NconditionalOp::debug(Context &localContext, Context &globalContext) {
     cout <<"Conditional Op: If: ";
-    condition.debug();
+    condition.debug(localContext, globalContext);
     cout << " Then: ";
-    lval.debug();
+    lval.debug(localContext, globalContext);
     cout << " Else: ";
-    rval.debug();
+    rval.debug(localContext, globalContext);
 }
 
-void NifBlock::debug() {
+void NifBlock::debug(Context &localContext, Context &globalContext) {
     cout <<"If ";
-    condition.debug();
+    condition.debug(localContext, globalContext);
     cout << "then ";
-    ifBlock.debug();
+    ifBlock.debug(localContext, globalContext);
     cout << "else ";
-    elseBlock.debug();
+    elseBlock.debug(localContext, globalContext);
     cout <<" ";
 }
 
-void NwhileBlock::debug() {
+void NwhileBlock::debug(Context &localContext, Context &globalContext) {
     cout <<"While ";
-    condition.debug();
+    condition.debug(localContext, globalContext);
     cout << " Do: \n";
-    statementBlock.debug();
+    statementBlock.debug(localContext, globalContext);
 }
 
-void NforBlock::debug() {
+void NforBlock::debug(Context &localContext, Context &globalContext) {
     cout<< "For ";
-    expr1.debug();
+    expr1.debug(localContext, globalContext);
     cout << "; ";
-    expr2.debug();
+    expr2.debug(localContext, globalContext);
     cout << "; ";
-    expr3.debug();
+    expr3.debug(localContext, globalContext);
     cout << "\n";
-    statementBlock.debug();
+    statementBlock.debug(localContext, globalContext);
 }
 
-void Nbreak::debug() {
+void Nbreak::debug(Context &localContext, Context &globalContext) {
     cout << "break; ";
 }
 
-void Ncontinue::debug() {
+void Ncontinue::debug(Context &localContext, Context &globalContext) {
     cout << "continue; ";
 }
 
-void Nreturn::debug() {
+void Nreturn::debug(Context &localContext, Context &globalContext) {
     cout <<"Return ";
-    expr.debug();
+    expr.debug(localContext, globalContext);
     cout <<" ";
 }

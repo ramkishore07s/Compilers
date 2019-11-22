@@ -6,7 +6,8 @@ class NStatementBlock : public Node {
 public:
     StatementBlock statements;
 
-    virtual void debug();
+    virtual void debug(Context &localContext, Context &globalContext);
+    virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
 };
 
 class NVariableDecls : public NStatement {
@@ -17,9 +18,20 @@ public:
             varNames.push_back(new NVariableName(type, names[t]->name, names[t]->sizes));
     }
 
-    virtual void debug();
+    virtual void debug(Context &localContext, Context &globalContext);
+    virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
 };
 
+class NassignOp : public NStatement {
+public:
+    NVariableName lhs;
+    Expr &rhs;
+
+    NassignOp(NVariableName lhs, Expr &rhs) :lhs(lhs), rhs(rhs) {}
+
+    virtual void debug(Context &localContext, Context &globalContext);
+    virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
+};
 
 class NifBlock : public NStatement {
 public:
@@ -30,7 +42,8 @@ public:
     NifBlock(Expr &condition, NStatementBlock ifBlock) : condition(condition), ifBlock(ifBlock) {}
     NifBlock(Expr &condition, NStatementBlock ifBlock, NStatementBlock elseBlock) : condition(condition), ifBlock(ifBlock), elseBlock(elseBlock)  {}
 
-    virtual void debug();
+    virtual void debug(Context &localContext, Context &globalContext);
+    virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
 };
 
 class NwhileBlock : public NStatement {
@@ -40,19 +53,21 @@ public:
 
     NwhileBlock(Expr &condition, NStatementBlock statementBlock) : condition(condition), statementBlock(statementBlock) {}
 
-    virtual void debug();
+    virtual void debug(Context &localContext, Context &globalContext);
+    virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
 };
 
 class NforBlock : public NStatement {
 public:
-    Expr &expr1;
-    Expr &expr2;
-    Expr &expr3;
+    NStatement &expr1;
+    NStatement &expr2;
+    NStatement &expr3;
     NStatementBlock statementBlock;
 
-    NforBlock(Expr &expr1, Expr &expr2, Expr &expr3, NStatementBlock statementBlock) : expr1(expr1), expr2(expr2), expr3(expr3), statementBlock(statementBlock) {}
+    NforBlock(NStatement &expr1, NStatement &expr2, NStatement &expr3, NStatementBlock statementBlock) : expr1(expr1), expr2(expr2), expr3(expr3), statementBlock(statementBlock) {}
 
-    virtual void debug();
+    virtual void debug(Context &localContext, Context &globalContext);
+    virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
 };
 
 class Nreturn : public NStatement {
@@ -61,15 +76,20 @@ public:
 
     Nreturn(Expr &expr) : expr(expr) {}
 
-    virtual void debug();
+    virtual void debug(Context &localContext, Context &globalContext);
+    virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
 };
+
+
 
 class Nbreak : public NStatement {
 public:
-    virtual void debug();
+    virtual void debug(Context &localContext, Context &globalContext);
+    virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
 };
 
 class Ncontinue : public NStatement {
 public:
-    virtual void debug();
+    virtual void debug(Context &localContext, Context &globalContext);
+    virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
 };
