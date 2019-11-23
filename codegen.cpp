@@ -219,10 +219,17 @@ Value* NifBlock::codeGen(Context &localContext, Context &globalContext, IRBuilde
 
 
 Value* NforBlock::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
+    CondBlock = BasicBlock::Create(llvmContext, "loopCondition", localContext.function);
     LoopBlock = BasicBlock::Create(llvmContext, "loop", localContext.function);
     PhiBlock = BasicBlock::Create(llvmContext, "endloop", localContext.function);
 
+    localContext.loopblocks.push(CondBlock);
+    localContext.endloopblocks.push(PhiBlock);
+
     expr1.codeGen(localContext, globalContext, Builder);
+    Builder.CreateBr(CondBlock);
+
+    Builder.SetInsertPoint(CondBlock);
     Builder.CreateCondBr(expr2.codeGen(localContext, globalContext, Builder),
                          LoopBlock, PhiBlock);
 
@@ -234,6 +241,9 @@ Value* NforBlock::codeGen(Context &localContext, Context &globalContext, IRBuild
     Builder.CreateCondBr(expr2.codeGen(localContext, globalContext, Builder),
                          LoopBlock, PhiBlock);
 
+    localContext.loopblocks.pop();
+    localContext.endloopblocks.pop();
+
     Builder.SetInsertPoint(PhiBlock);
 
     return nullVal;
@@ -241,9 +251,15 @@ Value* NforBlock::codeGen(Context &localContext, Context &globalContext, IRBuild
 
 
 Value* NwhileBlock::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
+    CondBlock = BasicBlock::Create(llvmContext, "loopCondition", localContext.function);
     LoopBlock = BasicBlock::Create(llvmContext, "loop", localContext.function);
     PhiBlock = BasicBlock::Create(llvmContext, "endloop", localContext.function);
 
+    localContext.loopblocks.push(CondBlock);
+    localContext.endloopblocks.push(PhiBlock);
+
+    Builder.CreateBr(CondBlock);
+    Builder.SetInsertPoint(CondBlock);
     Builder.CreateCondBr(condition.codeGen(localContext, globalContext, Builder),
                          LoopBlock, PhiBlock);
 
@@ -253,26 +269,31 @@ Value* NwhileBlock::codeGen(Context &localContext, Context &globalContext, IRBui
     Builder.CreateCondBr(condition.codeGen(localContext, globalContext, Builder),
                          LoopBlock, PhiBlock);
 
+    localContext.loopblocks.pop();
+    localContext.endloopblocks.pop();
+
     Builder.SetInsertPoint(PhiBlock);
 
     return nullVal;
 }
 
 Value* Nbreak::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
-    cout << "break; ";
+    AfterBreak = BasicBlock::Create(llvmContext, "break", localContext.function);
+    Builder.CreateBr(localContext.endloopblocks.top());
+    Builder.SetInsertPoint(AfterBreak);
+
     return nullVal;
 }
 
 Value* Ncontinue::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
-    cout << "continue; ";
+    AfterContinue = BasicBlock::Create(llvmContext, "continue", localContext.function);
+    Builder.CreateBr(localContext.loopblocks.top());
+    Builder.SetInsertPoint(AfterContinue);
+
     return nullVal;
 }
 
 Value* Nreturn::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
-    cout <<"Return ";
-    ;
-    cout <<" ";
-
     Builder.CreateRet(expr.codeGen(localContext, globalContext, Builder));
     return nullVal;
 }

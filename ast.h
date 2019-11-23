@@ -61,6 +61,8 @@ class Context {
 public:
     std::map<std::string, Value*> locals;
     std::map<std::string, NVariableName*> localtypes;
+    std::stack<BasicBlock*> loopblocks;
+    std::stack<BasicBlock*> endloopblocks;
     Module *module;
     Function *function;
 };
@@ -77,3 +79,5 @@ public:
 };
 
 static LLVMContext llvmContext;
+
+void linkIoFunctions(Module* module, IRBuilder<> &Builder);

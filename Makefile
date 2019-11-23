@@ -4,7 +4,9 @@ OBJS = parser.o  \
        scanner.o \
        codegen.o \
        debug.o \
-       main.o
+       main.o \
+       io.o \
+       link.o \
 
 LLVMCONFIG = llvm-config
 CPPFLAGS = `$(LLVMCONFIG) --cppflags`
@@ -15,7 +17,7 @@ LIBS = `$(LLVMCONFIG) --libs core executionengine mcjit interpreter analysis tar
 WARNINGS = -Wno-deprecated-register -Wno-writable-strings
 
 clean:
-	$(RM) -rf parser.cpp parser.hpp parser scanner.cpp $(OBJS)
+	$(RM) -rf parser parser.cpp parser.hpp parser scanner.cpp $(OBJS)
 
 parser.cpp: parser.y
 	bison -d -o $@ $^

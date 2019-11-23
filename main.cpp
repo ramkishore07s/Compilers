@@ -10,7 +10,7 @@ int main(int argc, char **argv)
     Context local, global;
 
     global.module = new Module("Compilers", llvmContext);
-
+    linkIoFunctions(global.module, Builder);
     yyparse();
     printf("Parsing Over\n");
     programNode->debug(local, global);

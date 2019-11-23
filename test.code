@@ -1,28 +1,21 @@
-int globals(int a) {
-    int x;
-    if (a < 2) {
-        a = 0;
-        } else {
-        a = 4;
-    }
-    return 1;
-}
-
 int pow(int x) {
     int a;
     int b;
-    for (a = 2; a < 3; a = a + 1;) {
+    b = 5;
+    outputInt(b);
+    while (b < 30) {
         b = b + 1;
+        if (b > 4) {
+        continue;
+        }
+         b = b + 1;
     }
-    b = 2;
-    while (b < 10) {
-        b = b + 1;
-    }
+    outputInt(b);
     return 16 + 5 + x;
 }
 
 int main() {
-    pow(2);
+    outputInt(pow(2));
     return 0;
 }
 

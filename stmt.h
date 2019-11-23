@@ -57,6 +57,7 @@ public:
 
     NwhileBlock(Expr &condition, NStatementBlock statementBlock) : condition(condition), statementBlock(statementBlock) {}
 
+    BasicBlock *CondBlock;
     BasicBlock *LoopBlock;
     BasicBlock *PhiBlock;
 
@@ -73,6 +74,7 @@ public:
 
     NforBlock(NStatement &expr1, NStatement &expr2, NStatement &expr3, NStatementBlock statementBlock) : expr1(expr1), expr2(expr2), expr3(expr3), statementBlock(statementBlock) {}
 
+    BasicBlock *CondBlock;
     BasicBlock *LoopBlock;
     BasicBlock *PhiBlock;
 
@@ -94,12 +96,15 @@ public:
 
 class Nbreak : public NStatement {
 public:
+    BasicBlock *AfterBreak;
+
     virtual void debug(Context &localContext, Context &globalContext);
     virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
 };
 
 class Ncontinue : public NStatement {
 public:
+    BasicBlock* AfterContinue;
     virtual void debug(Context &localContext, Context &globalContext);
     virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
 };
