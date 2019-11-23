@@ -1,12 +1,12 @@
 int main() {
+    bool c;
     int b;
-    int d;
-    bool c[10][5];
-    b = c[1][2];
-    c[1][2] = 5;
-    d = c[1][2];
-    outputInt(c[1][2]);
-    outputInt(d);
+    char a;
+    a = 'c';
+    outputChar(a);
+    c = (b > 3);
+    outputInt(b);
+    outputInt(c);
     return 0;
 }
 

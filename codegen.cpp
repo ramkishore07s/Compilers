@@ -10,8 +10,9 @@ Type* getElementType(string type, IRBuilder<> &Builder) {
     } else if (type == "bool") {
         return Builder.getInt1Ty();
     } else if (type == "char") {
-        return Builder.getInt32Ty();
+        return Builder.getInt8Ty();
     }
+    return Builder.getInt1Ty();
 }
 
 Value *nullVal;
@@ -45,6 +46,17 @@ Value* NChar::codeGen(Context &localContext, Context &globalContext, IRBuilder<>
     return ConstantInt::get(getElementType("char", Builder), int(c), false);
 }
 
+
+Value* NBool::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
+    cout << "Bool: " << value;
+    int c;
+    if (value == "true") { c = 1; }
+    else { c = 0; }
+    return ConstantInt::get(getElementType("bool", Builder), int(c), false);
+}
+
+
+
 Value* NVariableName::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
     cerr<< "VarName :: " << this->type << " : " << this->name << " " << localContext.localtypes[name]->isarg << "; ";
     for (size_t t=0; t<sizes.size(); t++)
@@ -66,7 +78,7 @@ Value* NVariableName::codeGen(Context &localContext, Context &globalContext, IRB
             index = index + localContext.localtypes[name]->sizes[t] * sizes[t];
         }
         index = index + sizes[t];
-        return Builder.CreateLoad(Builder.getInt32Ty(), Builder.CreateGEP(localContext.locals[name], Builder.getInt32(index)));
+        return Builder.CreateLoad(getElementType(localContext.localtypes[name]->type, Builder), Builder.CreateGEP(localContext.locals[name], Builder.getInt32(index)));
     }
 
 
@@ -109,7 +121,7 @@ Value* NFunctionDef::codeGen(Context &localContext_, Context &globalContext, IRB
         argTypes.push_back(Builder.getInt32Ty());
     }
 
-    funcType = FunctionType::get(Builder.getInt32Ty(), argTypes, false);
+    funcType = FunctionType::get(getElementType(type, Builder), argTypes, false);
     fooFunc = Function::Create(funcType, GlobalValue::InternalLinkage, id, globalContext.module);
 
     localContext.function = fooFunc;
@@ -168,11 +180,11 @@ Value* NVariableDecls::codeGen(Context &localContext, Context &globalContext, IR
     for (size_t t=0; t < varNames.size(); t++) {
         //varNames[t]->codeGen is only called for variable access
         if (varNames[t]->sizes.size() == 0) {
-            localContext.locals[varNames[t]->name] = Builder.CreateAlloca(Builder.getInt32Ty(), Builder.getInt32(0), varNames[t]->name);
+            localContext.locals[varNames[t]->name] = Builder.CreateAlloca(getElementType(type, Builder), Builder.getInt32(0), varNames[t]->name);
             localContext.localtypes[varNames[t]->name] = varNames[t];
         } else { //Array types
             for (size_t i=0; i<varNames[t]->sizes.size(); i++) { totalsize *= varNames[t]->sizes[i]; }
-            localContext.locals[varNames[t]->name] = Builder.CreateAlloca(Builder.getInt32Ty(), Builder.getInt32(totalsize), varNames[t]->name);
+            localContext.locals[varNames[t]->name] = Builder.CreateAlloca(getElementType(type, Builder), Builder.getInt32(totalsize), varNames[t]->name);
             localContext.localtypes[varNames[t]->name] = varNames[t];
         }
     }

@@ -11,9 +11,14 @@ void linkIoFunctions(Module *module, IRBuilder<> &Builder) {
     module->getOrInsertFunction("outputUint", outtype);
 
     std::vector<Type*> outargs2;
-    outargs2.push_back(Builder.getInt32Ty());
+    outargs2.push_back(Builder.getInt8Ty());
     FunctionType *outtype3 = FunctionType::get(Builder.getVoidTy(), makeArrayRef(outargs2), false);
     module->getOrInsertFunction("outputChar", outtype3);
+
+    std::vector<Type*> outargs3;
+    outargs3.push_back(Builder.getInt8Ty());
+    FunctionType *outtype4 = FunctionType::get(Builder.getVoidTy(), makeArrayRef(outargs3), false);
+    module->getOrInsertFunction("outputChar", outtype4);
 
     /*
     std::vector<Type*> inargs;

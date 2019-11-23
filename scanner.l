@@ -23,6 +23,9 @@ using namespace std;
 "char"      SAVE_TOKEN; return TYPE;
 "file"      SAVE_TOKEN; return TYPE;
 
+"true"      SAVE_TOKEN; return BOOL;
+"false"     SAVE_TOKEN; return BOOL;
+
 "for"       return TOKEN(FOR);
 "while"     return TOKEN(WHILE);
 "if"        return TOKEN(IF);

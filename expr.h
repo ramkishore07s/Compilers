@@ -28,6 +28,14 @@ public:
     virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
 };
 
+class NBool : public Nconstant {
+public:
+    string value;
+
+    NBool(string x) : value(x) {}
+    virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
+};
+
 class Nstr : public Nconstant {
 public:
     string s;

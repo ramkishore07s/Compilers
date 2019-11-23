@@ -13,7 +13,8 @@ public:
 class NVariableDecls : public NStatement {
 public:
     VarNames varNames;
-    NVariableDecls(string type, VarNames names) {
+    string type;
+    NVariableDecls(string type, VarNames names) :type(type) {
         for (size_t t=0; t<names.size(); t++)
             varNames.push_back(new NVariableName(type, names[t]->name, names[t]->sizes));
     }

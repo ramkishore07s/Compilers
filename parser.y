@@ -23,6 +23,7 @@
     Nconstant *constant;
     Nnum *n;
     NChar *c;
+    NBool *b;
 
     Expr *expr;
     Narg *arg;
@@ -46,7 +47,7 @@
     std::string *str;
 }
 
-%token  <str> ID STR BINOPADDSUB BINOPMULDIV BINOPMOD BINOPBOOL OPNOT TYPE NUM CHAR
+%token  <str> ID STR BINOPADDSUB BINOPMULDIV BINOPMOD BINOPBOOL OPNOT TYPE NUM CHAR BOOL
 %token  <token> LBRACE RBRACE LPAREN RPAREN LSQPAREN RSQPAREN
 %token  <token> EQTO QMARK
 %token  <token> FOR WHILE IF ELSE RETURN BREAK CONTINUE
@@ -113,6 +114,7 @@ stmts : stmts stmt { $1->statements.push_back($2); }
 constant : varName { $$ = new NVariableName($1->name, $1->sizes); }
 | NUM { $$ = new Nnum(stoi(*$1)); }
 | CHAR { $$ = new NChar(*$1); }
+| BOOL { $$ = new NBool(*$1); }
 ;
 
 expr : constant { $$ = $1; }
