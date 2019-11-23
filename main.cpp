@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 
     yyparse();
     printf("Parsing Over\n");
-    //programNode->debug(local, global);
+    programNode->debug(local, global);
 
     programNode->codeGen(local, global, Builder);
 

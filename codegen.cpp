@@ -217,23 +217,44 @@ Value* NifBlock::codeGen(Context &localContext, Context &globalContext, IRBuilde
     return nullVal;
 }
 
-Value* NwhileBlock::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
-    cout <<"While ";
-    condition.codeGen(localContext, globalContext, Builder);
-    cout << " Do: \n";
+
+Value* NforBlock::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
+    LoopBlock = BasicBlock::Create(llvmContext, "loop", localContext.function);
+    PhiBlock = BasicBlock::Create(llvmContext, "endloop", localContext.function);
+
+    expr1.codeGen(localContext, globalContext, Builder);
+    Builder.CreateCondBr(expr2.codeGen(localContext, globalContext, Builder),
+                         LoopBlock, PhiBlock);
+
+    Builder.SetInsertPoint(LoopBlock);
     statementBlock.codeGen(localContext, globalContext, Builder);
+
+    expr3.codeGen(localContext, globalContext, Builder);
+
+    Builder.CreateCondBr(expr2.codeGen(localContext, globalContext, Builder),
+                         LoopBlock, PhiBlock);
+
+    Builder.SetInsertPoint(PhiBlock);
+
     return nullVal;
 }
 
-Value* NforBlock::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
-    cout<< "For ";
-    expr1.codeGen(localContext, globalContext, Builder);
-    cout << "; ";
-    expr2.codeGen(localContext, globalContext, Builder);
-    cout << "; ";
-    expr3.codeGen(localContext, globalContext, Builder);
-    cout << "\n";
+
+Value* NwhileBlock::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
+    LoopBlock = BasicBlock::Create(llvmContext, "loop", localContext.function);
+    PhiBlock = BasicBlock::Create(llvmContext, "endloop", localContext.function);
+
+    Builder.CreateCondBr(condition.codeGen(localContext, globalContext, Builder),
+                         LoopBlock, PhiBlock);
+
+    Builder.SetInsertPoint(LoopBlock);
     statementBlock.codeGen(localContext, globalContext, Builder);
+
+    Builder.CreateCondBr(condition.codeGen(localContext, globalContext, Builder),
+                         LoopBlock, PhiBlock);
+
+    Builder.SetInsertPoint(PhiBlock);
+
     return nullVal;
 }
 

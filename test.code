@@ -2,9 +2,8 @@ int globals(int a) {
     int x;
     if (a < 2) {
         a = 0;
-        if (x < 3) {
-            x = 4;
-        }
+        } else {
+        a = 4;
     }
     return 1;
 }
@@ -12,17 +11,12 @@ int globals(int a) {
 int pow(int x) {
     int a;
     int b;
-    a = (a < 2) <  (b > 4);
-    x = 4;
-    if (a < 2) {
-        a = x + 2;
-        x = 4;
-        if (b > 45) {
-            a = 2;
-        }
-    } else {
-    a = 4;
-    x = 2;
+    for (a = 2; a < 3; a = a + 1;) {
+        b = b + 1;
+    }
+    b = 2;
+    while (b < 10) {
+        b = b + 1;
     }
     return 16 + 5 + x;
 }
