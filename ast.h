@@ -1,10 +1,31 @@
 #include <iostream>
+#include <stack>
 #include <vector>
+#include <typeinfo>
+
 #include <llvm/IR/Value.h>
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
+#include <llvm/IR/Constants.h>
 #include "llvm/IR/Verifier.h"
+#include <llvm/IR/Module.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/Function.h>
+#include <llvm/IR/Type.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/LegacyPassManager.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/CallingConv.h>
+#include <llvm/IR/IRPrintingPasses.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/Attributes.h>
+#include <llvm-c/Target.h>
+#include <llvm/Bitstream/BitstreamReader.h>
+#include <llvm/Bitstream/BitstreamWriter.h>
+#include <llvm/Support/TargetSelect.h>
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
+#include <llvm/ExecutionEngine/MCJIT.h>
+#include <llvm/ExecutionEngine/GenericValue.h>
+#include <llvm/Support/raw_ostream.h>
 
 using namespace std;
 using namespace llvm;
@@ -41,6 +62,7 @@ public:
     std::map<std::string, Value*> locals;
     std::map<std::string, NVariableName*> localtypes;
     Module *module;
+    Function *function;
 };
 
 typedef std::vector<BasicBlock*> Blocks;

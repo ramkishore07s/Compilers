@@ -38,26 +38,15 @@ class NVariableName : public Nconstant {
 public:
     string type;
     string name;
+    bool isarg;
     vector<int> sizes;
 
-    NVariableName(string name) : name(name) {}
-    NVariableName(string name, vector<int> sizes_) : name(name), sizes(sizes_) {}
-    NVariableName(string type, string name, vector<int> sizes_) : type(type), name(name), sizes(sizes_) {
-    }
+    NVariableName(string name) : name(name) { isarg = false; }
+    NVariableName(string name, vector<int> sizes_) : name(name), sizes(sizes_) { isarg = false; }
+    NVariableName(string type, string name, vector<int> sizes_) : type(type), name(name), sizes(sizes_) { isarg = false; }
 
     virtual void debug(Context &localContext, Context &globalContext);
     virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
-};
-
-class NVariableAccess : public Nconstant {
-public:
-    string name;
-    vector<int> sizes;
-
-    NVariableAccess(string name, vector<int>sizes) : name(name), sizes(sizes) {}
-    virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
-
-
 };
 
 class NbinOp : public Expr {

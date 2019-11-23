@@ -19,7 +19,6 @@
     NStatementBlock *statementBlock;
 
     NVariableName *varName;
-    NVariableAccess *varAccess;
     VarNames *varNames;
     Nconstant *constant;
     Nnum *n;
@@ -109,7 +108,7 @@ stmts : stmts stmt { $1->statements.push_back($2); }
 | stmt { $$ = new NStatementBlock(); $$->statements.push_back($1); }
 ;
 
-constant : varName { $$ = new NVariableAccess($1->name, $1->sizes); }
+constant : varName { $$ = new NVariableName($1->name, $1->sizes); }
 | NUM { $$ = new Nnum(stoi(*$1)); }
 | CHAR { $$ = new NChar(*$1); }
 ;

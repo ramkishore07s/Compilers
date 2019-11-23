@@ -24,13 +24,28 @@ Value* NStatementBlock::codeGen(Context &localContext, Context &globalContext, I
 }
 Value* Nnum::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
     cout << "Number: " << num;
-    return Builder.getInt32(num);
+    return (Value*) ConstantInt::get(Builder.getInt32Ty(), int(num), false);
+    //return num;
 }
 
 Value* NChar::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
     cout << "Char: " << int(c);
-    return Builder.getInt32(int(c));
+    return ConstantInt::get(Builder.getInt32Ty(), int(c), false);
 }
+
+Value* NVariableName::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
+    cerr<< "VarName :: " << this->type << " : " << this->name << " " << localContext.localtypes[name]->isarg << "; ";
+    for (size_t t=0; t<sizes.size(); t++)
+        cout << sizes[t] << " ";
+
+    if (localContext.localtypes[name]->isarg) {
+        // Arguments cannot be loaded since they are not stored anywhere!
+        return localContext.locals[name];
+    } else {
+        return Builder.CreateLoad(localContext.locals[name]);
+    }
+}
+
 Value* Narg::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
     cout << "Arg: "<< type << " " << varName.name << " " << varName.type;
     return nullVal;
@@ -61,18 +76,24 @@ Value* NFunctionDef::codeGen(Context &localContext_, Context &globalContext, IRB
     std::vector<Type*> argTypes;
 
     for (size_t t=0; t<args.arguments.size(); t++) {
+        args.arguments[t]->varName.isarg = true;
         argNames.push_back(args.arguments[t]->varName.name);
         //TODO: assign type according to var type
-        argTypes.push_back(Type::getInt32Ty(llvmContext));
+        argTypes.push_back(Builder.getInt32Ty());
     }
 
     funcType = FunctionType::get(Builder.getInt32Ty(), argTypes, false);
     fooFunc = Function::Create(funcType, GlobalValue::InternalLinkage, id, globalContext.module);
 
-    Function::arg_iterator AI, AE; unsigned i = 0;
-    for (AI = fooFunc->arg_begin(), AE = fooFunc->arg_end(); AI != AE; ++AI, ++i)
-        AI->setName(argNames[i]);
+    localContext.function = fooFunc;
 
+    Function::arg_iterator AI, AE; unsigned i = 0;
+    for (AI = fooFunc->arg_begin(), AE = fooFunc->arg_end(); AI != AE; ++AI, ++i) {
+        cout << argNames[i] << "\n";
+        AI->setName(argNames[i]);
+        localContext.locals[argNames[i]] = (Value*) AI;
+        localContext.localtypes[argNames[i]] = &args.arguments[i]->varName;
+    }
     BasicBlock *entry = BasicBlock::Create(llvmContext, "entry", fooFunc);
     Builder.SetInsertPoint(entry);
     blocks.push_back(entry);
@@ -98,14 +119,6 @@ Value* NfunctionCall::codeGen(Context &localContext, Context &globalContext, IRB
     return Builder.CreateCall(function, args);
 }
 
-Value* NVariableName::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
-    cout<< "VarName :: " << this->type << " : " << this->name << " ";
-    for (size_t t=0; t<sizes.size(); t++)
-        cout << sizes[t] << " ";
-
-    return Builder.CreateLoad(localContext.locals[name]);
-}
-
 Value* NVariableDecls::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
     cout << "VarDecl :: ";
     for (size_t t=0; t < varNames.size(); t++) {
@@ -117,11 +130,6 @@ Value* NVariableDecls::codeGen(Context &localContext, Context &globalContext, IR
     return nullVal;
 }
 
-Value* NVariableAccess::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
-    cout << "Var access: " << name;
-    return Builder.CreateLoad(localContext.locals[name]);
-}
-
 
 Value* NbinOp::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
     lhs.codeGen(localContext, globalContext, Builder);
@@ -129,18 +137,41 @@ Value* NbinOp::codeGen(Context &localContext, Context &globalContext, IRBuilder<
     rhs.codeGen(localContext, globalContext, Builder);
     cout << " ";
 
-    return Builder.CreateAdd(lhs.codeGen(localContext, globalContext, Builder),
-                             rhs.codeGen(localContext, globalContext, Builder),
-                             "op");
+    Value *val;
+    if (op == "+") {
+        val = Builder.CreateAdd(lhs.codeGen(localContext, globalContext, Builder),
+                                rhs.codeGen(localContext, globalContext, Builder));
+    } else if (op == "-") {
+        val = Builder.CreateSub(lhs.codeGen(localContext, globalContext, Builder),
+                                rhs.codeGen(localContext, globalContext, Builder));
+    } else if (op == "*") {
+        val = Builder.CreateMul(lhs.codeGen(localContext, globalContext, Builder),
+                               rhs.codeGen(localContext, globalContext, Builder));
+    } else if (op == "/") {
+        val = Builder.CreateSDiv(lhs.codeGen(localContext, globalContext, Builder),
+                                rhs.codeGen(localContext, globalContext, Builder));
+    } else if (op == "<") {
+        val = Builder.CreateICmpSLT(lhs.codeGen(localContext, globalContext, Builder),
+                                    rhs.codeGen(localContext, globalContext, Builder));
+    } else if (op == ">") {
+        val = Builder.CreateICmpSGT(lhs.codeGen(localContext, globalContext, Builder),
+                                    rhs.codeGen(localContext, globalContext, Builder));
+    } else if (op == "<=") {
+        val = Builder.CreateICmpSLE(lhs.codeGen(localContext, globalContext, Builder),
+                                    rhs.codeGen(localContext, globalContext, Builder));
+    } else if (op == ">=") {
+        val = Builder.CreateICmpSGE(lhs.codeGen(localContext, globalContext, Builder),
+                                    rhs.codeGen(localContext, globalContext, Builder));
+    }
+    return val;
 }
 
 Value* NassignOp::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
-    cout << "AssignOp: " << lhs.name << " ";
-    cout <<" ";
+    cerr << "AssignOp: " << lhs.name << " ";
+    cerr <<" ";
 
     return Builder.CreateStore(rhs.codeGen(localContext, globalContext, Builder),
-                               lhs.codeGen(localContext, globalContext, Builder),
-                               false);
+                              localContext.locals[lhs.name]);
 }
 
 Value* NconditionalOp::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
@@ -161,6 +192,8 @@ Value* NifBlock::codeGen(Context &localContext, Context &globalContext, IRBuilde
     cout << "else ";
     elseBlock.codeGen(localContext, globalContext, Builder);
     cout <<" ";
+
+
     return nullVal;
 }
 

@@ -42,6 +42,10 @@ public:
     NifBlock(Expr &condition, NStatementBlock ifBlock) : condition(condition), ifBlock(ifBlock) {}
     NifBlock(Expr &condition, NStatementBlock ifBlock, NStatementBlock elseBlock) : condition(condition), ifBlock(ifBlock), elseBlock(elseBlock)  {}
 
+    BasicBlock* ThenBlock;
+    BasicBlock* ElseBlock;
+    BasicBlock* PhiBlock;
+
     virtual void debug(Context &localContext, Context &globalContext);
     virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
 };
