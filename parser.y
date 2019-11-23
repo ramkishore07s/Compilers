@@ -21,6 +21,7 @@
     NVariableName *varName;
     VarNames *varNames;
     Nconstant *constant;
+    NArrayAccess *arrayAccess;
     Nnum *n;
     NChar *c;
     NBool *b;
@@ -71,6 +72,7 @@
 %type <whileBlock> whileBlock
 %type <forBlock> forBlock
 %type <functionCall> funcCall
+%type <arrayAccess> arrayAccess
 
 
 %left QMARK
@@ -111,10 +113,15 @@ stmts : stmts stmt { $1->statements.push_back($2); }
 | stmt { $$ = new NStatementBlock(); $$->statements.push_back($1); }
 ;
 
-constant : varName { $$ = new NVariableName($1->name, $1->sizes); }
-| NUM { $$ = new Nnum(stoi(*$1)); }
+constant : NUM { $$ = new Nnum(stoi(*$1)); }
 | CHAR { $$ = new NChar(*$1); }
 | BOOL { $$ = new NBool(*$1); }
+| arrayAccess { $$ = $1; }
+//| varName { $$ = new NVariableName($1->name, $1->sizes); }
+;
+
+arrayAccess : ID  { $$ = new NArrayAccess(*$1); }
+| arrayAccess LSQPAREN expr RSQPAREN { $1->exprs.push_back($3); }
 ;
 
 expr : constant { $$ = $1; }
@@ -141,7 +148,7 @@ stmt : variableDecls { $$ = $1; }
 | CONTINUE SCOLON { $$ = new Ncontinue(); }
 ;
 
-assignExpr : varName EQTO expr { $$ = new NassignOp(*$1, *$3); }
+assignExpr : arrayAccess EQTO expr { $$ = new NassignOp(*$1, *$3); }
 ;
 
 condiExpr : expr QMARK expr COLON expr { $$ = new NconditionalOp(*$1, *$3, *$5); }

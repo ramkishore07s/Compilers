@@ -1,12 +1,26 @@
 int main() {
-    bool c;
-    int b;
-    char a;
-    a = 'c';
-    outputChar(a);
-    c = (b > 3);
-    outputInt(b);
-    outputInt(c);
+    int i;
+    int c[10][10];
+    i = 5;
+    c[i][i] = i;
+    outputInt(c[5]);
+    for (i=0; i<10; i=i+1;) {
+        c[i][i] = i * i;
+        outputInt(c[i][i]);
+    }
+    while (i < 20) {
+        i = i + 1;
+        c[i-10][i-10] = i;
+        if (i > 15) {
+        continue;
+        }
+        outputInt(c[i-10][i-10]);
+
+    }
+
+    bool d[10][10];
+    d[3][5] = true;
+    outputBool(d[3][5] + 10);
     return 0;
 }
 

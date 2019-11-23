@@ -10,7 +10,7 @@ extern "C" void outputInt(int32_t val) { printf("%d\n", val); }
 extern "C" void outputUint(int32_t val) { printf("%u\n", val); }
 extern "C" void outputChar(int8_t val) { printf("%c\n", (char)val); }
 extern "C" void outputBool(int8_t val) {
-    if (val == 1) {
+    if (val > 0) {
         cout << "true\n";
     } else {
         cout << "false\n";

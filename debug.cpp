@@ -99,6 +99,10 @@ void NassignOp::debug(Context &localContext, Context &globalContext) {
     cout <<" ";
 }
 
+void NArrayAccess::debug(Context &localContext, Context &globalContext) {
+    cout << "array access: " << exprs.size() << " \n";
+}
+
 void NconditionalOp::debug(Context &localContext, Context &globalContext) {
     cout <<"Conditional Op: If: ";
     condition.debug(localContext, globalContext);

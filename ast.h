@@ -56,6 +56,8 @@ class Nnum;
 class NChar;
 class Nstr;
 
+typedef std::vector<Expr*> Exprs;
+
 
 class Context {
 public:

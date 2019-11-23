@@ -25,10 +25,10 @@ public:
 
 class NassignOp : public NStatement {
 public:
-    NVariableName lhs;
+    NArrayAccess lhs;
     Expr &rhs;
 
-    NassignOp(NVariableName lhs, Expr &rhs) :lhs(lhs), rhs(rhs) {}
+    NassignOp(NArrayAccess lhs, Expr &rhs) :lhs(lhs), rhs(rhs) {}
 
     virtual void debug(Context &localContext, Context &globalContext);
     virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);

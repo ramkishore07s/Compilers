@@ -80,9 +80,59 @@ Value* NVariableName::codeGen(Context &localContext, Context &globalContext, IRB
         index = index + sizes[t];
         return Builder.CreateLoad(getElementType(localContext.localtypes[name]->type, Builder), Builder.CreateGEP(localContext.locals[name], Builder.getInt32(index)));
     }
+}
 
+Value* NVariableName::codeGen2(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
+    cout << "\n" << localContext.localtypes[name]->sizes.size() << " dda" << sizes.size() << "\n";
+    if (localContext.localtypes[name]->sizes.size() == 0) {
+        return localContext.locals[name];
+    } else {
+        int index = 0;
+        size_t t;
+        for (t=0; t<sizes.size()-1; t++) {
+            index = index + localContext.localtypes[name]->sizes[t] * sizes[t];
+        }
+        index = index + sizes[t];
+        return Builder.CreateGEP(localContext.locals[name], Builder.getInt32(index));
+    }
+}
 
+Value* NArrayAccess::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
+    cerr << "array access:: " << name;
+    size_t t;
+    Value *index, *dim;
+    index = Builder.getInt32(0);
+    if (exprs.size() > 0) {
+        for (t = 0; t < exprs.size() - 1; t++) {
+            dim = Builder.CreateMul(Builder.getInt32(localContext.localtypes[name]->sizes[t]),
+                                    exprs[t]->codeGen(localContext, globalContext, Builder));
+            index = Builder.CreateAdd(index, dim);
+        }
+        index = Builder.CreateAdd(index, exprs[t]->codeGen(localContext, globalContext, Builder));
+        return Builder.CreateLoad(getElementType(localContext.localtypes[name]->type, Builder),
+                                  Builder.CreateGEP(localContext.locals[name], index));
+    }
+    else {
+        return Builder.CreateLoad(localContext.locals[name]);
+    }
+}
 
+Value* NArrayAccess::codeGen2(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
+    cerr << "array access:: " << name;
+    size_t t;
+    Value *index, *dim;
+    index = Builder.getInt32(0);
+    if (exprs.size() > 0) {
+        for (t = 0; t < exprs.size() - 1; t++) {
+            dim = Builder.CreateMul(Builder.getInt32(localContext.localtypes[name]->sizes[t]),
+                                    exprs[t]->codeGen(localContext, globalContext, Builder));
+            index = Builder.CreateAdd(index, dim);
+        }
+        index = Builder.CreateAdd(index, exprs[t]->codeGen(localContext, globalContext, Builder));
+        return Builder.CreateGEP(localContext.locals[name], index);
+    } else {
+        return localContext.locals[name];
+    }
 }
 
 Value* Narg::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
@@ -235,18 +285,10 @@ Value* NnotOp::codeGen(Context &localContext, Context &globalContext, IRBuilder<
 }
 
 Value* NassignOp::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
-    if (localContext.localtypes[lhs.name]->sizes.size() == 0) {
-        return Builder.CreateStore(rhs.codeGen(localContext, globalContext, Builder), localContext.locals[lhs.name]);
-    } else {
-        int index = 0;
-        size_t t;
-        for (t=0; t<lhs.sizes.size()-1; t++) {
-            index = index + localContext.localtypes[lhs.name]->sizes[t] * lhs.sizes[t];
-        }
-        index = index + lhs.sizes[t];
-        //return Builder.CreateInsertElement(localContext.locals[lhs.name], rhs.codeGen(localContext, globalContext, Builder), Builder.getInt32(index));
-        return Builder.CreateStore(rhs.codeGen(localContext, globalContext, Builder), Builder.CreateGEP(localContext.locals[lhs.name], Builder.getInt32(index)));
-    }
+    cerr << "array access assign:: " << lhs.name << lhs.exprs.size() << "\n";
+    return Builder.CreateStore(rhs.codeGen(localContext, globalContext, Builder),// localContext.locals[lhs.name]);
+                               lhs.codeGen2(localContext, globalContext, Builder));
+
 }
 
 Value* NconditionalOp::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
@@ -303,8 +345,7 @@ Value* NforBlock::codeGen(Context &localContext, Context &globalContext, IRBuild
 
     expr3.codeGen(localContext, globalContext, Builder);
 
-    Builder.CreateCondBr(expr2.codeGen(localContext, globalContext, Builder),
-                         LoopBlock, PhiBlock);
+    Builder.CreateBr(CondBlock);
 
     localContext.loopblocks.pop();
     localContext.endloopblocks.pop();
@@ -332,8 +373,7 @@ Value* NwhileBlock::codeGen(Context &localContext, Context &globalContext, IRBui
     Builder.SetInsertPoint(LoopBlock);
     statementBlock.codeGen(localContext, globalContext, Builder);
 
-    Builder.CreateCondBr(condition.codeGen(localContext, globalContext, Builder),
-                         LoopBlock, PhiBlock);
+    Builder.CreateBr(CondBlock);
 
     localContext.loopblocks.pop();
     localContext.endloopblocks.pop();

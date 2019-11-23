@@ -55,6 +55,22 @@ public:
 
     virtual void debug(Context &localContext, Context &globalContext);
     virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
+    Value* codeGen2(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
+};
+
+class NArrayAccess : public Nconstant {
+public:
+    string type;
+    string name;
+    Exprs exprs;
+
+    NArrayAccess(string name) : name(name) {}
+    NArrayAccess(string name, Exprs exprs) : name(name), exprs(exprs) {}
+
+    virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
+    virtual void debug(Context &localContext, Context &globalContext);
+
+    Value* codeGen2(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
 };
 
 class NbinOp : public Expr {
