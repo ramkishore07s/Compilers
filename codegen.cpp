@@ -167,6 +167,7 @@ Value* NFunctionDef::codeGen(Context &localContext_, Context &globalContext, IRB
     for (size_t t=0; t<args.arguments.size(); t++) {
         args.arguments[t]->varName.isarg = true;
         argNames.push_back(args.arguments[t]->varName.name);
+        args.arguments[t]->varName.type = args.arguments[t]->type;
         //TODO: assign type according to var type
         argTypes.push_back(Builder.getInt32Ty());
     }
@@ -194,11 +195,14 @@ Value* NFunctionDef::codeGen(Context &localContext_, Context &globalContext, IRB
 
     size_t t = 0;
     for (AI = fooFunc->arg_begin(), AE = fooFunc->arg_end(); AI != AE; ++AI, ++t) {
-        varNames = new VarNames();
-        varNames->push_back(&args.arguments[t]->varName);
-        varDecl = new NVariableDecls(args.arguments[t]->varName.type, *varNames);
-        varDecl->codeGen(localContext, globalContext, Builder);
-        Builder.CreateStore(AI, localContext.locals[args.arguments[t]->varName.name]);
+        cerr << "create pass by value " << args.arguments[t]->varName.name << args.arguments[t]->varName.type << "\n";
+        //if (args.arguments[t]->varName.sizes.size() == 0) {
+            varNames = new VarNames();
+            varNames->push_back(&args.arguments[t]->varName);
+            varDecl = new NVariableDecls(args.arguments[t]->varName.type, *varNames);
+            varDecl->codeGen(localContext, globalContext, Builder);
+            Builder.CreateStore(AI, localContext.locals[args.arguments[t]->varName.name]);
+       //}
     }
 
     blocks.push_back(entry);

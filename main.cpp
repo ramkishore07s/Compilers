@@ -40,7 +40,7 @@ int main(int argc, char **argv)
         ee->finalizeObject();
         cerr << "Object finalised\n";
         std::vector<GenericValue> noargs;
-        GenericValue v = ee->runFunction(mainFunction, noargs);
+        ee->runFunction(mainFunction, noargs);
         cerr << "Code was run.\n";
     }
 

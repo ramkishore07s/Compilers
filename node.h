@@ -4,7 +4,8 @@ class Narg : public Node {
 public:
     string type;
     NVariableName varName;
-    Narg(string type, NVariableName varName) : type(type), varName(varName) {}
+    Narg(string type, NVariableName varName) : type(type), varName(varName) {
+    }
 
     virtual void debug(Context &localContext, Context &globalContext);
     virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);

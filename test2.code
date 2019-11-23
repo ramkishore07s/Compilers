@@ -1,0 +1,12 @@
+int pow(int i) {
+    i = 2;
+    outputInt(i);
+    return 10;
+}
+
+int main() {
+    int d;
+    d = 2;
+    pow(d);
+    return 0;
+}

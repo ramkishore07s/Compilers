@@ -95,7 +95,7 @@ args : arg { $$ = new Nargs(); $$->arguments.push_back($<arg>1); }
 | args COMMA arg { $1->arguments.push_back($<arg>3); }
 ;
 
-arg : TYPE varName { $$ = new Narg(*$1, *$2); }
+arg : TYPE varName { $$ = new Narg(*$1, *$2); $2->type = *$1; }
 ;
 
 functionDefs : functionDef { $$ = new NProgram(); $$->functions.push_back($<functionDef>1); }
