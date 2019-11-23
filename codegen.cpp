@@ -40,6 +40,7 @@ Value* NVariableName::codeGen(Context &localContext, Context &globalContext, IRB
 
     if (localContext.localtypes[name]->isarg) {
         // Arguments cannot be loaded since they are not stored anywhere!
+        // All arguments are allocated memory initially
         return localContext.locals[name];
     } else {
         return Builder.CreateLoad(localContext.locals[name]);
@@ -91,11 +92,27 @@ Value* NFunctionDef::codeGen(Context &localContext_, Context &globalContext, IRB
     for (AI = fooFunc->arg_begin(), AE = fooFunc->arg_end(); AI != AE; ++AI, ++i) {
         cout << argNames[i] << "\n";
         AI->setName(argNames[i]);
-        localContext.locals[argNames[i]] = (Value*) AI;
-        localContext.localtypes[argNames[i]] = &args.arguments[i]->varName;
     }
+
     BasicBlock *entry = BasicBlock::Create(llvmContext, "entry", fooFunc);
     Builder.SetInsertPoint(entry);
+
+    // Allocate memory for variables
+    NVariableDecls *varDecl;
+    NassignOp *assignOp;
+    VarNames *varNames;
+
+    Context argContext;
+
+    size_t t = 0;
+    for (AI = fooFunc->arg_begin(), AE = fooFunc->arg_end(); AI != AE; ++AI, ++t) {
+        varNames = new VarNames();
+        varNames->push_back(&args.arguments[t]->varName);
+        varDecl = new NVariableDecls(args.arguments[t]->varName.type, *varNames);
+        varDecl->codeGen(localContext, globalContext, Builder);
+        Builder.CreateStore(AI, localContext.locals[args.arguments[t]->varName.name]);
+    }
+
     blocks.push_back(entry);
 
     statementBlock.codeGen(localContext, globalContext, Builder);
@@ -132,11 +149,6 @@ Value* NVariableDecls::codeGen(Context &localContext, Context &globalContext, IR
 
 
 Value* NbinOp::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
-    lhs.codeGen(localContext, globalContext, Builder);
-    cout <<" Op: " << op << " ";
-    rhs.codeGen(localContext, globalContext, Builder);
-    cout << " ";
-
     Value *val;
     if (op == "+") {
         val = Builder.CreateAdd(lhs.codeGen(localContext, globalContext, Builder),
@@ -185,14 +197,22 @@ Value* NconditionalOp::codeGen(Context &localContext, Context &globalContext, IR
 }
 
 Value* NifBlock::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
-    cout <<"If ";
-    condition.codeGen(localContext, globalContext, Builder);
-    cout << "then ";
-    ifBlock.codeGen(localContext, globalContext, Builder);
-    cout << "else ";
-    elseBlock.codeGen(localContext, globalContext, Builder);
-    cout <<" ";
+    ThenBlock = BasicBlock::Create(llvmContext, "then", localContext.function);
+    ElseBlock = BasicBlock::Create(llvmContext, "else", localContext.function);
+    PhiBlock = BasicBlock::Create(llvmContext, "endif", localContext.function);
 
+    Builder.CreateCondBr(condition.codeGen(localContext, globalContext, Builder),
+                         ThenBlock, ElseBlock);
+
+    Builder.SetInsertPoint(ThenBlock);
+    ifBlock.codeGen(localContext, globalContext, Builder);
+    Builder.CreateBr(PhiBlock);
+
+    Builder.SetInsertPoint(ElseBlock);
+    elseBlock.codeGen(localContext, globalContext, Builder);
+    Builder.CreateBr(PhiBlock);
+
+    Builder.SetInsertPoint(PhiBlock);
 
     return nullVal;
 }
