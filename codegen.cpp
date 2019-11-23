@@ -138,10 +138,17 @@ Value* NfunctionCall::codeGen(Context &localContext, Context &globalContext, IRB
 
 Value* NVariableDecls::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
     cout << "VarDecl :: ";
+    int totalsize = 1;
     for (size_t t=0; t < varNames.size(); t++) {
         //varNames[t]->codeGen is only called for variable access
-        localContext.locals[varNames[t]->name] = Builder.CreateAlloca(Builder.getInt32Ty(), Builder.getInt32(0), varNames[t]->name);
-        localContext.localtypes[varNames[t]->name] = varNames[t];
+        if (varNames[t]->sizes.size() == 0) {
+            localContext.locals[varNames[t]->name] = Builder.CreateAlloca(Builder.getInt32Ty(), Builder.getInt32(0), varNames[t]->name);
+            localContext.localtypes[varNames[t]->name] = varNames[t];
+        } else { //Array types
+            for (size_t i=0; i<varNames[t]->sizes.size(); i++) { totalsize *= varNames[t]->sizes[i]; }
+            localContext.locals[varNames[t]->name] = Builder.CreateAlloca(VectorType::get(Builder.getInt32Ty(), totalsize), Builder.getInt32(0), varNames[t]->name);
+            localContext.localtypes[varNames[t]->name] = varNames[t];
+        }
     }
     cout << " ";
     return nullVal;
@@ -150,6 +157,7 @@ Value* NVariableDecls::codeGen(Context &localContext, Context &globalContext, IR
 
 Value* NbinOp::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
     Value *val;
+
     if (op == "+") {
         val = Builder.CreateAdd(lhs.codeGen(localContext, globalContext, Builder),
                                 rhs.codeGen(localContext, globalContext, Builder));
@@ -174,8 +182,18 @@ Value* NbinOp::codeGen(Context &localContext, Context &globalContext, IRBuilder<
     } else if (op == ">=") {
         val = Builder.CreateICmpSGE(lhs.codeGen(localContext, globalContext, Builder),
                                     rhs.codeGen(localContext, globalContext, Builder));
+    } else if (op == "&") {
+        val = Builder.CreateAnd(lhs.codeGen(localContext, globalContext, Builder),
+                               rhs.codeGen(localContext, globalContext, Builder));
+    } else if (op == "|") {
+        val = Builder.CreateOr(lhs.codeGen(localContext, globalContext, Builder),
+                               rhs.codeGen(localContext, globalContext, Builder));
     }
     return val;
+}
+
+Value* NnotOp::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
+    return Builder.CreateNot(expr.codeGen(localContext, globalContext, Builder));
 }
 
 Value* NassignOp::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
@@ -200,6 +218,8 @@ Value* NifBlock::codeGen(Context &localContext, Context &globalContext, IRBuilde
     ThenBlock = BasicBlock::Create(llvmContext, "then", localContext.function);
     ElseBlock = BasicBlock::Create(llvmContext, "else", localContext.function);
     PhiBlock = BasicBlock::Create(llvmContext, "endif", localContext.function);
+
+    Builder.getInt1Ty();
 
     Builder.CreateCondBr(condition.codeGen(localContext, globalContext, Builder),
                          ThenBlock, ElseBlock);
@@ -260,7 +280,8 @@ Value* NwhileBlock::codeGen(Context &localContext, Context &globalContext, IRBui
 
     Builder.CreateBr(CondBlock);
     Builder.SetInsertPoint(CondBlock);
-    Builder.CreateCondBr(condition.codeGen(localContext, globalContext, Builder),
+    Value * val = condition.codeGen(localContext, globalContext, Builder);
+    Builder.CreateCondBr(val,
                          LoopBlock, PhiBlock);
 
     Builder.SetInsertPoint(LoopBlock);

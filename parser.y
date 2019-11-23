@@ -31,6 +31,7 @@
     Nargs *arguments;
 
     NbinOp *binOp;
+    NnotOp *notOp;
     NassignOp * assignOp;
     NconditionalOp *conditionalOp;
 
@@ -45,7 +46,7 @@
     std::string *str;
 }
 
-%token  <str> ID STR BINOPADDSUB BINOPMULDIV BINOPMOD BINOPBOOL TYPE NUM CHAR
+%token  <str> ID STR BINOPADDSUB BINOPMULDIV BINOPMOD BINOPBOOL OPNOT TYPE NUM CHAR
 %token  <token> LBRACE RBRACE LPAREN RPAREN LSQPAREN RSQPAREN
 %token  <token> EQTO QMARK
 %token  <token> FOR WHILE IF ELSE RETURN BREAK CONTINUE
@@ -77,6 +78,7 @@
 %left BINOPMOD
 %left BINOPMULDIV
 %left BINOPBOOL
+%right OPNOT
 
 
 %start program
@@ -122,6 +124,7 @@ expr : constant { $$ = $1; }
 | condiExpr { $$ = $1; }
 | LPAREN expr RPAREN { $$ = $2; }
 | BINOPADDSUB expr { $$ = new NbinOp(*((Expr*) new Nnum(0)), *$2, *$1); }
+| OPNOT expr { $$ = new NnotOp(*$2); }
 ;
 
 stmt : variableDecls { $$ = $1; }

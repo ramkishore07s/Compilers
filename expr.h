@@ -104,3 +104,12 @@ public:
     virtual void debug(Context &localContext, Context &globalContext);
     virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
 };
+
+class NnotOp : public Expr {
+public:
+    Expr &expr;
+
+    NnotOp(Expr &expr) : expr(expr) {}
+
+    virtual Value* codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder);
+};

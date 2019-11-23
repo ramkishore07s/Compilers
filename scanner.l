@@ -54,6 +54,10 @@ using namespace std;
 \<=        SAVE_TOKEN; return BINOPBOOL;
 \>=?       SAVE_TOKEN; return BINOPBOOL;
 
+\|         SAVE_TOKEN; return BINOPBOOL;
+&          SAVE_TOKEN; return BINOPBOOL;
+!          SAVE_TOKEN; return OPNOT;
+
 :          return TOKEN(COLON);
 \?         return TOKEN(QMARK);
 ,          return TOKEN(COMMA);
