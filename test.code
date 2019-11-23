@@ -1,9 +1,12 @@
 int main() {
     int b;
-    int c[10][5];
+    int d;
+    bool c[10][5];
     b = c[1][2];
-    c[1][2] = 2;
-    outputInt(c[2][3]);
+    c[1][2] = 5;
+    d = c[1][2];
+    outputInt(c[1][2]);
+    outputInt(d);
     return 0;
 }
 

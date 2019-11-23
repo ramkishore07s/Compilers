@@ -2,6 +2,18 @@
 
 using namespace std;
 
+Type* getElementType(string type, IRBuilder<> &Builder) {
+    if (type == "int") {
+        return Builder.getInt32Ty();
+    } else if (type == "uint") {
+        return Builder.getInt32Ty();
+    } else if (type == "bool") {
+        return Builder.getInt1Ty();
+    } else if (type == "char") {
+        return Builder.getInt32Ty();
+    }
+}
+
 Value *nullVal;
 
 Value* NProgram::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
@@ -24,13 +36,13 @@ Value* NStatementBlock::codeGen(Context &localContext, Context &globalContext, I
 }
 Value* Nnum::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
     cout << "Number: " << num;
-    return (Value*) ConstantInt::get(Builder.getInt32Ty(), int(num), false);
+    return (Value*) ConstantInt::get(getElementType("int", Builder), int(num), false);
     //return num;
 }
 
 Value* NChar::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
     cout << "Char: " << int(c);
-    return ConstantInt::get(Builder.getInt32Ty(), int(c), false);
+    return ConstantInt::get(getElementType("char", Builder), int(c), false);
 }
 
 Value* NVariableName::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
@@ -220,7 +232,8 @@ Value* NassignOp::codeGen(Context &localContext, Context &globalContext, IRBuild
             index = index + localContext.localtypes[lhs.name]->sizes[t] * lhs.sizes[t];
         }
         index = index + lhs.sizes[t];
-        return Builder.CreateInsertElement(localContext.locals[lhs.name], rhs.codeGen(localContext, globalContext, Builder), Builder.getInt32(index));
+        //return Builder.CreateInsertElement(localContext.locals[lhs.name], rhs.codeGen(localContext, globalContext, Builder), Builder.getInt32(index));
+        return Builder.CreateStore(rhs.codeGen(localContext, globalContext, Builder), Builder.CreateGEP(localContext.locals[lhs.name], Builder.getInt32(index)));
     }
 }
 
