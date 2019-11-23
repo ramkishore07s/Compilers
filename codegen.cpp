@@ -42,9 +42,23 @@ Value* NVariableName::codeGen(Context &localContext, Context &globalContext, IRB
         // Arguments cannot be loaded since they are not stored anywhere!
         // All arguments are allocated memory initially
         return localContext.locals[name];
-    } else {
-        return Builder.CreateLoad(localContext.locals[name]);
     }
+
+    cout << "\n" << localContext.localtypes[name]->sizes.size() << " " << sizes.size() << "\n";
+    if (localContext.localtypes[name]->sizes.size() == 0) {
+        return Builder.CreateLoad(localContext.locals[name]);
+    } else {
+        int index = 0;
+        size_t t;
+        for (t=0; t<sizes.size()-1; t++) {
+            index = index + localContext.localtypes[name]->sizes[t] * sizes[t];
+        }
+        index = index + sizes[t];
+        return Builder.CreateLoad(Builder.getInt32Ty(), Builder.CreateGEP(localContext.locals[name], Builder.getInt32(index)));
+    }
+
+
+
 }
 
 Value* Narg::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
@@ -146,7 +160,7 @@ Value* NVariableDecls::codeGen(Context &localContext, Context &globalContext, IR
             localContext.localtypes[varNames[t]->name] = varNames[t];
         } else { //Array types
             for (size_t i=0; i<varNames[t]->sizes.size(); i++) { totalsize *= varNames[t]->sizes[i]; }
-            localContext.locals[varNames[t]->name] = Builder.CreateAlloca(VectorType::get(Builder.getInt32Ty(), totalsize), Builder.getInt32(0), varNames[t]->name);
+            localContext.locals[varNames[t]->name] = Builder.CreateAlloca(Builder.getInt32Ty(), Builder.getInt32(totalsize), varNames[t]->name);
             localContext.localtypes[varNames[t]->name] = varNames[t];
         }
     }
@@ -197,11 +211,17 @@ Value* NnotOp::codeGen(Context &localContext, Context &globalContext, IRBuilder<
 }
 
 Value* NassignOp::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {
-    cerr << "AssignOp: " << lhs.name << " ";
-    cerr <<" ";
-
-    return Builder.CreateStore(rhs.codeGen(localContext, globalContext, Builder),
-                              localContext.locals[lhs.name]);
+    if (localContext.localtypes[lhs.name]->sizes.size() == 0) {
+        return Builder.CreateStore(rhs.codeGen(localContext, globalContext, Builder), localContext.locals[lhs.name]);
+    } else {
+        int index = 0;
+        size_t t;
+        for (t=0; t<lhs.sizes.size()-1; t++) {
+            index = index + localContext.localtypes[lhs.name]->sizes[t] * lhs.sizes[t];
+        }
+        index = index + lhs.sizes[t];
+        return Builder.CreateInsertElement(localContext.locals[lhs.name], rhs.codeGen(localContext, globalContext, Builder), Builder.getInt32(index));
+    }
 }
 
 Value* NconditionalOp::codeGen(Context &localContext, Context &globalContext, IRBuilder<> &Builder) {

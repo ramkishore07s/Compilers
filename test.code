@@ -1,31 +1,9 @@
-int pow(int x) {
-    int c[4][5];
-    bool a;
-    uint b;
-    b = 'a';
-    a = -2;
-    outputInt(c[2][3]);
-    outputInt(a);
-    outputUint(a);
-    outputChar(b);
-    outputInt(b);
-    a = 5;
-    while (b < 30) {
-        b = b + 1;
-        if (b > 14) {
-            outputInt(b);
-        } else {
-            outputInt(0);
-        }
-         b = b + 1;
-    }
-    outputInt(b);
-    outputInt(b < 30);
-    return 16 + 5 + x;
-}
-
 int main() {
-    outputChar(pow(2) + 66);
+    int b;
+    int c[10][5];
+    b = c[1][2];
+    c[1][2] = 2;
+    outputInt(c[2][3]);
     return 0;
 }
 
