@@ -1,0 +1,17 @@
+int pow(int i[10]) {
+    int j[10];
+    int c;
+    c = i[5];
+    i[5] = 5;
+        j[5] = 2;
+    return 10;
+}
+int main() {
+    int c[10];
+    int j;
+    j = 5;
+        c[5] = 2;
+    pow(c);
+    outputInt(c[5]);
+    return 0;
+}

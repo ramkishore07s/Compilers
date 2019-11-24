@@ -1,4 +1,4 @@
-int pow(int i, int xd) {
+int pow(int i, bool xd[10]) {
     int c[10][10];
     i = 5;
     c[i][i] = i;
@@ -20,16 +20,16 @@ int pow(int i, int xd) {
     bool d[10][10];
     d[3][5] = true;
     outputBool(d[3][5] + 10);
-    return 10 + xd;
+    return 10;
 }
 
 int main() {
         int c;
-        c = inputInt();
         outputInt(c);
     int d;
-    d = pow(d, 5);
+    bool e[10];
     outputInt(d);
+    pow(3, e);
 
     return 0;
 }

@@ -12,7 +12,7 @@ Type* getElementType(string type, IRBuilder<> &Builder) {
     } else if (type == "char") {
         return Builder.getInt8Ty();
     }
-    return Builder.getInt1Ty();
+    return Builder.getInt32Ty();
 }
 
 Value *nullVal;
@@ -102,6 +102,9 @@ Value* NArrayAccess::codeGen(Context &localContext, Context &globalContext, IRBu
     size_t t;
     Value *index, *dim;
     index = Builder.getInt32(0);
+    if (exprs.size() < localContext.localtypes[name]->sizes.size()) {
+        return Builder.CreateGEP(getElementType(localContext.localtypes[name]->type, Builder), localContext.locals[name], Builder.getInt32(0));
+    }
     if (exprs.size() > 0) {
         for (t = 0; t < exprs.size() - 1; t++) {
             dim = Builder.CreateMul(Builder.getInt32(localContext.localtypes[name]->sizes[t]),
@@ -109,8 +112,7 @@ Value* NArrayAccess::codeGen(Context &localContext, Context &globalContext, IRBu
             index = Builder.CreateAdd(index, dim);
         }
         index = Builder.CreateAdd(index, exprs[t]->codeGen(localContext, globalContext, Builder));
-        return Builder.CreateLoad(getElementType(localContext.localtypes[name]->type, Builder),
-                                  Builder.CreateGEP(localContext.locals[name], index));
+        return Builder.CreateLoad(Builder.CreateGEP(getElementType(localContext.localtypes[name]->type, Builder), localContext.locals[name], index));
     }
     else {
         return Builder.CreateLoad(localContext.locals[name]);
@@ -165,11 +167,18 @@ Value* NFunctionDef::codeGen(Context &localContext_, Context &globalContext, IRB
     std::vector<Type*> argTypes;
 
     for (size_t t=0; t<args.arguments.size(); t++) {
-        args.arguments[t]->varName.isarg = true;
         argNames.push_back(args.arguments[t]->varName.name);
         args.arguments[t]->varName.type = args.arguments[t]->type;
-        //TODO: assign type according to var type
-        argTypes.push_back(Builder.getInt32Ty());
+
+        if (args.arguments[t]->varName.sizes.size() == 0) {
+            args.arguments[t]->varName.isarg = true;
+            argTypes.push_back(getElementType(args.arguments[t]->varName.type, Builder));
+        } else {
+            int totalsize = 1;
+            for (size_t i=0; i<args.arguments[t]->varName.sizes.size(); i++) { totalsize *= args.arguments[t]->varName.sizes[i]; }
+            //argTypes.push_back(VectorType::get(getElementType(args.arguments[t]->varName.type, Builder), totalsize)->getPointerTo(0));
+            argTypes.push_back(getElementType(args.arguments[t]->varName.type, Builder)->getPointerTo(0));
+        }
     }
 
     funcType = FunctionType::get(getElementType(type, Builder), argTypes, false);
@@ -195,14 +204,17 @@ Value* NFunctionDef::codeGen(Context &localContext_, Context &globalContext, IRB
 
     size_t t = 0;
     for (AI = fooFunc->arg_begin(), AE = fooFunc->arg_end(); AI != AE; ++AI, ++t) {
-        cerr << "create pass by value " << args.arguments[t]->varName.name << args.arguments[t]->varName.type << "\n";
-        //if (args.arguments[t]->varName.sizes.size() == 0) {
+        if (args.arguments[t]->varName.sizes.size() == 0) {
+            cerr << "create pass by value " << args.arguments[t]->varName.name << args.arguments[t]->varName.type << "\n";
             varNames = new VarNames();
             varNames->push_back(&args.arguments[t]->varName);
             varDecl = new NVariableDecls(args.arguments[t]->varName.type, *varNames);
             varDecl->codeGen(localContext, globalContext, Builder);
             Builder.CreateStore(AI, localContext.locals[args.arguments[t]->varName.name]);
-       //}
+        } else {
+            localContext.locals[args.arguments[t]->varName.name] = AI;
+            localContext.localtypes[args.arguments[t]->varName.name] = &args.arguments[t]->varName;
+        }
     }
 
     blocks.push_back(entry);
