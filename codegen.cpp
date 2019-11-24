@@ -103,7 +103,12 @@ Value* NArrayAccess::codeGen(Context &localContext, Context &globalContext, IRBu
     Value *index, *dim;
     index = Builder.getInt32(0);
     if (exprs.size() < localContext.localtypes[name]->sizes.size()) {
-        return Builder.CreateGEP(getElementType(localContext.localtypes[name]->type, Builder), localContext.locals[name], Builder.getInt32(0));
+        for (t = 0; t < exprs.size(); t++) {
+            dim = Builder.CreateMul(Builder.getInt32(localContext.localtypes[name]->sizes[t]),
+                                    exprs[t]->codeGen(localContext, globalContext, Builder));
+            index = Builder.CreateAdd(index, dim);
+        }
+        return Builder.CreateGEP(getElementType(localContext.localtypes[name]->type, Builder), localContext.locals[name], index);
     }
     if (exprs.size() > 0) {
         for (t = 0; t < exprs.size() - 1; t++) {

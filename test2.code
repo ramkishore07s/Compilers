@@ -7,11 +7,12 @@ int pow(int i[10]) {
     return 10;
 }
 int main() {
-    int c[10];
+    int c[10][10];
     int j;
     j = 5;
-        c[5] = 2;
-    pow(c);
-    outputInt(c[5]);
+        c[5][5] = 2;
+            outputInt(c[5][5]);
+    pow(c[5]);
+    outputInt(c[5][5]);
     return 0;
 }

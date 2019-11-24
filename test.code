@@ -28,7 +28,9 @@ int main() {
         outputInt(c);
     int d;
     bool e[10];
+    outputBool(e[3][5]);
     outputInt(d);
+    outputBool(e[3][5]);
     pow(3, e);
 
     return 0;
