@@ -11,7 +11,7 @@ int pow(int i, int xd) {
         i = i + 1;
         c[i-10][i-10] = i;
         if (i > 15) {
-        break;
+        continue;
         }
         outputInt(c[i-10][i-10]);
 
@@ -24,9 +24,13 @@ int pow(int i, int xd) {
 }
 
 int main() {
+        int c;
+        c = inputInt();
+        outputInt(c);
     int d;
     d = pow(d, 5);
     outputInt(d);
+
     return 0;
 }
 

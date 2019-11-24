@@ -20,14 +20,14 @@ void linkIoFunctions(Module *module, IRBuilder<> &Builder) {
     FunctionType *outtype4 = FunctionType::get(Builder.getVoidTy(), makeArrayRef(outargs3), false);
     module->getOrInsertFunction("outputBool", outtype4);
 
-    /*
+
     std::vector<Type*> inargs;
     FunctionType *intype = FunctionType::get(Builder.getInt32Ty(), makeArrayRef(inargs), false);
     module->getOrInsertFunction("inputInt", intype);
 
     FunctionType *intype2 = FunctionType::get(Builder.getInt32Ty(), makeArrayRef(inargs), false);
     module->getOrInsertFunction("inputChar", intype2);
-    */
+
     //std::vector<Type*> readStrArgs;
     //readStrArgs.push_back(Type::getInt8PtrTy(getGlobalContext()));
     //FunctionType *input_str = FunctionType::get(Type::getInt8PtrTy(getGlobalContext()), makeArrayRef(readStrArgs), false);

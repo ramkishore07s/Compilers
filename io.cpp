@@ -17,9 +17,9 @@ extern "C" void outputBool(int8_t val) {
     }
 }
 
-//extern "C" int inputInt() { int32_t a; cin.ignore(); (cin >> a).get(); cin.ignore(numeric_limits<streamsize>::max(),'\n'); return a; }
+extern "C" int inputInt() { int32_t a; std::cin.ignore(INT_MAX); (cin >> a).get(); std::cin.ignore(INT_MAX); return a; }
 //extern "C" int inputInt() {int32_t a; scanf("%d", &a); return a; }
-extern "C" int inputInt() {
+/*extern "C" int inputInt() {
     int32_t a;
     char line[100000];
 
@@ -28,7 +28,7 @@ extern "C" int inputInt() {
         a=0;
 
     return a;
-}
+}*/
 extern "C" int32_t inputChar() {
     int c;
     do
